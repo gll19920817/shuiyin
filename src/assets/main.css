@@ -5,12 +5,12 @@
 @layer base {
     @font-face {
         font-family: "MiSans-Demibold";
-        src: url(./fonts/MiSans-Demibold.ttf) format("truetype");
+        src: url(./fonts/MiSans-Demibold.woff2) format('woff2');;
     }
 
     @font-face {
         font-family: "MiSans-Light";
-        src: url(./fonts/MiSans-Light.ttf) format("truetype");
+        src: url(./fonts/MiSans-Light.woff2) format('woff2');;
     }
 
     h3 {

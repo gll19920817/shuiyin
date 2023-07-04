@@ -96,6 +96,7 @@ const brandLogos = {
   xiaomi: "x",
   zeiss: "x",
   zte: "y",
+  lp: 'x',
 };
 
 const rectangleLogo = computed(
@@ -122,7 +123,9 @@ const refresh = () => window.location.reload();
         v-if="exifObj && Object.keys(exifObj).length"
         class="bg-white p-5 flex justify-between items-start"
       >
-        <h3 v-show="exifObj.Model" class="text-sm">{{ exifObj.Model }}</h3>
+        <div>
+          <h3 v-show="exifObj.Model" class="text-sm">{{ exifObj.Model }}</h3>
+        </div>
         <div class="flex justify-between items-center gap-3">
           <img
             v-show="exifObj.Model"
@@ -210,7 +213,7 @@ const refresh = () => window.location.reload();
   </footer>
 
   <div
-    class="glass w-full h-full md:w-2/3 md:h-4/5 overflow-y-scroll absolute flex flex-col md:flex-row px-6 py-10 gap-4"
+    class="glass text-gray-300 w-full h-full md:w-2/3 md:h-4/5 overflow-y-scroll absolute flex flex-col md:flex-row px-6 py-10 gap-4"
     v-if="exifObj && showEditor"
   >
     <button
@@ -241,7 +244,7 @@ const refresh = () => window.location.reload();
         <div class="flex flex-col gap-2">
           <h5>相机厂商</h5>
           <input
-            class="outline-none px-2 py-1 rounded"
+            class="outline-none px-2 py-1 rounded text-gray-600"
             type="text"
             v-model="exifObj.Make"
           />
@@ -249,7 +252,7 @@ const refresh = () => window.location.reload();
         <div class="flex flex-col gap-2">
           <h5>相机型号</h5>
           <input
-            class="outline-none px-2 py-1 rounded"
+            class="outline-none px-2 py-1 rounded text-gray-600"
             type="text"
             v-model="exifObj.Model"
           />
@@ -257,7 +260,7 @@ const refresh = () => window.location.reload();
         <div class="flex flex-col gap-2">
           <h5>焦距(mm)</h5>
           <input
-            class="outline-none px-2 py-1 rounded"
+            class="outline-none px-2 py-1 rounded text-gray-600"
             type="number"
             min="1"
             v-model="exifObj.FocalLengthIn35mmFilm"
@@ -266,7 +269,7 @@ const refresh = () => window.location.reload();
         <div class="flex flex-col gap-2">
           <h5>光圈(ƒ)</h5>
           <input
-            class="outline-none px-2 py-1 rounded"
+            class="outline-none px-2 py-1 rounded text-gray-600"
             type="number"
             step="0.1"
             min="0.95"
@@ -276,7 +279,7 @@ const refresh = () => window.location.reload();
         <div class="flex flex-col gap-2">
           <h5>快门速度(s)</h5>
           <input
-            class="outline-none px-2 py-1 rounded"
+            class="outline-none px-2 py-1 rounded text-gray-600"
             type="number"
             step="0.001"
             min="0.001"
@@ -286,7 +289,7 @@ const refresh = () => window.location.reload();
         <div class="flex flex-col gap-2">
           <h5>ISO</h5>
           <input
-            class="outline-none px-2 py-1 rounded"
+            class="outline-none px-2 py-1 rounded text-gray-600"
             type="number"
             min="50"
             v-model="exifObj.ISOSpeedRatings"
@@ -295,7 +298,7 @@ const refresh = () => window.location.reload();
         <div class="flex flex-col gap-2">
           <h5>拍摄时间</h5>
           <input
-            class="outline-none px-2 py-1 rounded"
+            class="outline-none px-2 py-1 rounded text-gray-600"
             type="datetime-local"
             v-model="exifObj.DateTimeFormated"
           />
