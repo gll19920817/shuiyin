@@ -4,6 +4,8 @@ import imageAddIcon from "./assets/imgs/image-add-line.png";
 import editIcon from "./assets/imgs/image-edit-line.png";
 import downloadIcon from "./assets/imgs/download-line.png";
 import closeIcon from "./assets/imgs/close-line.png";
+import sunIcon from "./assets/imgs/sun-line.png";
+import moonIcon from "./assets/imgs/moon-line.png";
 
 import { ref, onMounted, computed } from "vue";
 import { useLoading } from "vue-loading-overlay";
@@ -54,7 +56,15 @@ const getExif = () => {
   }, 1000);
 };
 
-const brandLogoPath = (logo) => `/images/${logo}.png`;
+const brandLogoPath = (logo, theme) => {
+  let suffix = brandLogos[logo].substr(-1);
+
+  if (theme == "dark" && suffix == "+") {
+    return `/images/${logo}_light.png`;
+  }
+
+  return `/images/${logo}.png`;
+};
 
 onMounted(() => {
   fileInput.value.addEventListener("change", (e) => {
@@ -78,11 +88,11 @@ onMounted(() => {
 const showEditor = ref(false);
 
 const brandLogos = {
-  apple: "x",
+  apple: "x+",
   canon: "y",
-  fujifilm: "y",
+  fujifilm: "y+",
   hasselblad: "x",
-  huawei: "x",
+  huawei: "x+",
   kodak: "y",
   leica: "x",
   nikon: "x",
@@ -92,11 +102,11 @@ const brandLogos = {
   pentax: "y",
   ricoh: "y",
   samsung: "y",
-  sony: "y",
+  sony: "y+",
   xiaomi: "x",
   zeiss: "x",
   zte: "y",
-  lp: 'x',
+  lp: "x",
 };
 
 const rectangleLogo = computed(
@@ -106,6 +116,10 @@ const rectangleLogo = computed(
 const toggleBrand = (brand) => (exifObj.value.Make = brand.toUpperCase());
 
 const refresh = () => window.location.reload();
+
+const theme = ref("light");
+const toggleTheme = () =>
+  (theme.value = theme.value == "dark" ? "light" : "dark");
 </script>
 
 <template>
@@ -121,7 +135,13 @@ const refresh = () => window.location.reload();
       <img id="photo" :src="imageUrl" />
       <div
         v-if="exifObj && Object.keys(exifObj).length"
-        class="bg-white p-5 flex justify-between items-start"
+        class="p-5 flex justify-between items-start"
+        :class="{
+          'bg-black': theme == 'dark',
+          'text-white': theme == 'dark',
+          'bg-white': theme == 'light',
+          'text-black': theme == 'light',
+        }"
       >
         <div>
           <h3 v-show="exifObj.Model" class="text-sm">{{ exifObj.Model }}</h3>
@@ -131,7 +151,7 @@ const refresh = () => window.location.reload();
             v-show="exifObj.Model"
             class="h-8 object-contain"
             :class="{ 'w-12': rectangleLogo, 'w-8': !rectangleLogo }"
-            :src="brandLogoPath(exifObj.Make.toLowerCase())"
+            :src="brandLogoPath(exifObj.Make.toLowerCase(), theme)"
           />
           <div class="w-[1.5px] h-9 bg-gray-300"></div>
           <div class="flex flex-col justify-between gap-3">
@@ -151,7 +171,7 @@ const refresh = () => window.location.reload();
               >
             </h3>
             <h5
-              class="font-light text-gray-600 opacity-75 text-xs leading-none flex gap-1 tracking-wider"
+              class="font-light opacity-75 text-xs leading-none flex gap-1 tracking-wider"
             >
               <span v-if="exifObj.DateTimeFormated">{{
                 exifObj.DateTimeFormated.split("T")[0].replaceAll("-", ".")
@@ -163,6 +183,15 @@ const refresh = () => window.location.reload();
           </div>
         </div>
       </div>
+    </div>
+
+    <div
+      v-if="!showEditor"
+      @click="toggleTheme"
+      class="p-2 cursor-pointer w-10 h-10 grid place-items-center rounded-full fixed right-[10vw] bottom-[30vh]"
+      :class="{ 'bg-white': theme == 'dark', 'bg-black': theme == 'light' }"
+    >
+      <img class="w-6 h-6" :src="theme == 'dark' ? sunIcon : moonIcon" />
     </div>
 
     <div
@@ -220,7 +249,7 @@ const refresh = () => window.location.reload();
       @click="showEditor = false"
       class="absolute top-2 right-2 rounded-full p-1 hover:bg-white transition-all"
     >
-      <img class="w-6 h-6" :src="closeIcon" alt="" />
+      <img class="w-6 h-6" :src="closeIcon" />
     </button>
     <div class="flex-1">
       <h3 class="border-b pb-2 mb-6">选择相机厂商</h3>
