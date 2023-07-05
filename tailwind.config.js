@@ -1,19 +1,15 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  mode: 'jit',
-  content: [
-    "./index.html",
-    "./src/App.vue",
-  ],
+  content: ["./index.html", "./src/App.vue"],
   theme: {
-    extend: {
-      
-    },
+    extend: {},
     fontFamily: {
-      Demibold: ["MiSans-Demibold", 'sans-serif'],
-      Light: ["MiSans-Light", 'sans-serif'],
-    }
+      Bold: ["Optima", "sans-serif"],
+      SemiBold: ["Dongqing", "sans-serif"],
+      Demibold: ["MiSans-Demibold", "sans-serif"],
+      Regular: ["MiSans-Regular", "sans-serif"],
+      ExtralLight: ["Handwrite", "sans-serif"],
+    },
   },
   plugins: [],
-}
-
+};

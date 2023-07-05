@@ -4,22 +4,54 @@
 
 @layer base {
     @font-face {
-        font-family: "MiSans-Demibold";
-        src: url(./fonts/MiSans-Demibold.woff2) format('woff2');;
+        font-family: "Optima";
+        src: url(./fonts/Optima-BoldItalic.woff2) format('woff2');
     }
 
     @font-face {
-        font-family: "MiSans-Light";
-        src: url(./fonts/MiSans-Light.woff2) format('woff2');;
+        font-family: "MiSans-Demibold";
+        src: url(./fonts/MiSans-Demibold.woff2) format('woff2');
+    }
+
+    @font-face {
+        font-family: "MiSans-Regular";
+        src: url(./fonts/MiSans-Regular.woff2) format('woff2');
+    }
+
+    
+    @font-face {
+        font-family: "Handwrite";
+        src: url(./fonts/Photograph-Signature.woff2) format('woff2');
+    }
+
+    @font-face {
+        font-family: "Dongqing";
+        src: url(./fonts/DongQingHeiTiJianTiZhongWen-W6-2.woff2) format('woff2');
+        font-weight: 600;
+        letter-spacing: 1rem;
+    }
+
+
+    h1 {
+        @apply font-Bold;
+    }
+
+    h2 {
+        @apply font-SemiBold;
     }
 
     h3 {
         @apply font-Demibold;
     }
 
-    h5 {
-        @apply font-Light;
+    h4 {
+        @apply font-ExtralLight;
     }
+
+    h5 {
+        @apply font-Regular;
+    }
+
 }
 
 .glass {

@@ -6,9 +6,19 @@ import downloadIcon from "./assets/imgs/download-line.png";
 import closeIcon from "./assets/imgs/close-line.png";
 import sunIcon from "./assets/imgs/sun-line.png";
 import moonIcon from "./assets/imgs/moon-line.png";
+import switcherIcon from "./assets/imgs/camera-switch-line.png";
+import slideshowIcon from "./assets/imgs/slideshow-line.png";
+import paletteIcon from "./assets/imgs/palette-line.svg";
 
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted, computed, watch } from "vue";
 import { useLoading } from "vue-loading-overlay";
+
+import { useToast } from "vue-toast-notification";
+import "vue-toast-notification/dist/theme-sugar.css";
+
+const $toast = useToast({
+  position: "top-right",
+});
 
 const $loading = useLoading({});
 
@@ -23,7 +33,6 @@ const downloadImg = () => {
   htmlToImage
     .toJpeg(document.getElementById("capture"), {
       quality: 1,
-      filter: (e) => e.id != "reload-btn",
     })
     .then(function (dataUrl) {
       $loader.value.hide();
@@ -39,18 +48,35 @@ const exifObj = ref(null);
 const imageUrl = ref("");
 
 const fileInput = ref(null);
-
 const uploadImg = () => {
   fileInput.value.click();
+};
+
+const colorPicker = ref(null);
+const pickColor = () => {
+  colorPicker.value.click();
 };
 
 const getExif = () => {
   EXIF.getData(document.getElementById("photo"), function () {
     exifObj.value = EXIF.getAllTags(this);
-    exifObj.value.DateTimeFormated =
-      exifObj.value.DateTimeOriginal.split(" ")[0].replaceAll(":", "-") +
-      "T" +
-      exifObj.value.DateTimeOriginal.split(" ")[1].substr(0, 5);
+
+    if (Object.keys(exifObj.value).length == 0) {
+      $toast.warning("Exif信息获取失败，请手动编辑");
+      return;
+    }
+
+    if (typeof exifObj.value.Make == "undefined") {
+      $toast.warning("Exif信息获取不完整，请手动补充");
+    }
+
+    if (typeof exifObj.value.DateTimeOriginal != "undefined") {
+      let original = exifObj.value.DateTimeOriginal.split(" ");
+      exifObj.value.DateTimeFormated =
+        original[0].replaceAll(":", "-") + "T" + original[1].substr(0, 5);
+    }
+
+    oritorientation.value = exifObj.value.PixelXDimension > exifObj.value.PixelYDimension ? 'landscape' : 'portrait'
   });
 };
 
@@ -64,7 +90,19 @@ const brandLogoPath = (logo, theme) => {
   return `/images/${logo}.png`;
 };
 
+const welcomeMessage = () => {
+  if (window.localStorage.getItem('first-time-visitor')) {
+    return;
+  }
+
+  window.localStorage.setItem('first-time-visitor', true);
+  $toast.info('欢迎👏🏻👏🏻👏🏻，首次使用请耐心等待网站字体加载完整，视网速情况约需要10-20s...', {
+    duration: 20000,
+  });
+}
+
 onMounted(() => {
+
   fileInput.value.addEventListener("change", (e) => {
     $loader.value = $loading.show({
       color: "#8bc63f",
@@ -78,6 +116,8 @@ onMounted(() => {
         getExif();
         $loader.value.hide();
       }, 1000);
+
+      welcomeMessage();
     });
 
     fileReader.readAsDataURL(e.target.files[0]);
@@ -89,19 +129,25 @@ const showEditor = ref(false);
 const brandLogos = {
   apple: "x+",
   canon: "y",
+  dji: 'x+',
   fujifilm: "y+",
   hasselblad: "x",
+  honor: "y+",
   huawei: "x+",
   kodak: "y",
   leica: "x",
+  lumix: "y+",
   nikon: "x",
   olympus: "y",
+  oneplus: 'y',
   oppo: "y",
   panasonic: "y",
   pentax: "y",
   ricoh: "y",
   samsung: "y",
   sony: "y+",
+  vivo: "x",
+  xmage: "y",
   xiaomi: "x",
   zeiss: "x",
   zte: "y",
@@ -119,105 +165,222 @@ const refresh = () => window.location.reload();
 const theme = ref("light");
 const toggleTheme = () =>
   (theme.value = theme.value == "dark" ? "light" : "dark");
+
+const templates = ["xiaomi", "oppo", "vivo", "huawei"];
+const tmpl_idx = ref(0);
+
+const template = computed(() => templates[tmpl_idx.value % templates.length]);
+const toggleTemplate = () => {
+  tmpl_idx.value++;
+  $toast.info(`水印样式【${templates[tmpl_idx.value % templates.length]}】`);
+};
+
+const showTooltips = ref({
+  refresh: false,
+  theme: false,
+  edit: false,
+  template: false,
+  download: false,
+});
+
+const handwriteColor = ref(theme.value == "dark" ? "#ffffff" : "#000000");
+const colorPickerInput = (e) => {
+  handwriteColor.value = e.target.value;
+};
+
+watch(theme, (newTheme) => {
+  handwriteColor.value = newTheme == "dark" ? "#ffffff" : "#000000";
+});
+
+const oritorientation = ref('landscape')
 </script>
 
 <template>
   <div v-if="imageUrl">
-    <div id="capture" class="max-w-xl relative">
-      <button
-        id="reload-btn"
-        @click="refresh"
-        class="absolute top-2 right-2 rounded-full p-1 hover:bg-white transition-all"
-      >
-        <img v-show="!showEditor" class="w-6 h-6" :src="closeIcon" alt="" />
-      </button>
-      <img id="photo" :src="imageUrl" />
-      <div
-        v-if="exifObj && Object.keys(exifObj).length"
-        class="p-5 flex justify-between items-start"
-        :class="{
+    <div id="capture" class="max-w-2xl relative">
+      <div :class="{
+        'px-6': template == 'oppo',
+        'pt-6': template == 'oppo',
+        'bg-white': theme == 'light',
+        'bg-black': theme == 'dark',
+      }">
+        <img id="photo" :src="imageUrl" />
+      </div>
+      <div v-if="exifObj && Object.keys(exifObj).length">
+        <div v-if="template == 'xiaomi'" class="p-5 flex justify-between items-start" :class="{
           'bg-black': theme == 'dark',
           'text-white': theme == 'dark',
           'bg-white': theme == 'light',
           'text-black': theme == 'light',
-        }"
-      >
-        <div>
-          <h3 v-show="exifObj.Model" class="text-sm">{{ exifObj.Model }}</h3>
-        </div>
-        <div class="flex justify-between items-center gap-3">
-          <img
-            v-show="exifObj.Model"
-            class="h-8 object-contain"
-            :class="{ 'w-12': rectangleLogo, 'w-8': !rectangleLogo }"
-            :src="brandLogoPath(exifObj.Make.toLowerCase(), theme)"
-          />
-          <div class="w-[1.5px] h-9 bg-gray-300 opacity-75"></div>
-          <div class="flex flex-col justify-between gap-3">
-            <h3 class="flex gap-2.5 text-sm leading-none">
-              <span v-show="exifObj.FocalLengthIn35mmFilm"
-                >{{ exifObj.FocalLengthIn35mmFilm }}mm</span
-              ><span v-show="exifObj.ApertureValue"
-                >f/{{ exifObj.ApertureValue }}</span
-              ><span v-show="exifObj.ExposureTime"
-                >{{
-                  exifObj.ExposureTime >= 1
+          'p-8': oritorientation == 'portrait'
+        }">
+          <div>
+            <h3 v-show="exifObj.Model" class="text-sm">{{ exifObj.Model }}</h3>
+          </div>
+
+          <h4 v-show="exifObj.Artist" class="text-lg tracking-wide" :style="{ color: handwriteColor }">
+            {{ exifObj.Artist }}
+          </h4>
+
+          <div class="flex justify-between items-center gap-3">
+            <img v-if="exifObj.Make" class="h-8 object-contain" :class="{ 'w-12': rectangleLogo, 'w-8': !rectangleLogo }"
+              :src="brandLogoPath(exifObj.Make.toLowerCase(), theme)" />
+            <div class="w-[1.5px] h-9 bg-[#cbcbcb] opacity-75"></div>
+            <div class="flex flex-col justify-between gap-3">
+              <h3 class="flex gap-2 text-sm leading-none">
+                <span v-show="exifObj.FocalLength">{{ exifObj.FocalLength }}mm</span><span
+                  v-show="exifObj.ApertureValue">f/{{ exifObj.ApertureValue }}</span><span
+                  v-show="exifObj.ExposureTime">{{
+                    exifObj.ExposureTime >= 1
                     ? exifObj.ExposureTime
                     : "1/" + Math.round(1 / exifObj.ExposureTime)
-                }}s</span
-              ><span v-show="exifObj.ISOSpeedRatings"
-                >ISO{{ exifObj.ISOSpeedRatings }}</span
-              >
-            </h3>
-            <h5
-              class="font-light text-gray-500 opacity-75 text-xs leading-none tracking-wider flex gap-1"
-            >
-              <span v-if="exifObj.DateTimeFormated">{{
-                exifObj.DateTimeFormated.split("T")[0].replaceAll("-", ".")
-              }}</span
-              ><span v-if="exifObj.DateTimeFormated"
-                >{{ exifObj.DateTimeFormated.split("T")[1] }}:00</span
-              >
-            </h5>
+                  }}s</span><span v-show="exifObj.ISOSpeedRatings">ISO{{ exifObj.ISOSpeedRatings }}</span>
+              </h3>
+              <h5 class="font-light text-[#717171] opacity-75 text-xs leading-none tracking-wider flex gap-1">
+                <span v-if="exifObj.DateTimeFormated">{{
+                  exifObj.DateTimeFormated.split("T")[0].replaceAll("-", ".")
+                }}</span><span v-if="exifObj.DateTimeFormated">{{
+  exifObj.DateTimeFormated.split("T")[1]
+}}</span>
+              </h5>
+            </div>
+          </div>
+        </div>
+        <div class="py-6 px-16 tracking-wide text-lg flex justify-between items-center" :class="{
+          'bg-black': theme == 'dark',
+          'text-white': theme == 'dark',
+          'bg-white': theme == 'light',
+          'text-black': theme == 'light',
+        }" v-else-if="template == 'oppo'">
+          <h3>{{ exifObj.Model }}</h3>
+          <h4 v-show="exifObj.Artist" class="text-lg tracking-wide" :style="{ color: handwriteColor }">
+            {{ exifObj.Artist }}
+          </h4>
+          <div class="flex flex-col items-end gap-3">
+            <h1>{{ exifObj.Make }}</h1>
+            <div class="flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-[#fd7a22]"></span>
+              <h3 class="flex items-center gap-2 text-xs text-[#717171] leading-none">
+                <span v-show="exifObj.FocalLength">{{ exifObj.FocalLength }}mm</span><span
+                  v-show="exifObj.ApertureValue">f/{{ exifObj.ApertureValue }}</span><span
+                  v-show="exifObj.ExposureTime">{{
+                    exifObj.ExposureTime >= 1
+                    ? exifObj.ExposureTime
+                    : "1/" + Math.round(1 / exifObj.ExposureTime)
+                  }}s</span><span v-show="exifObj.ISOSpeedRatings">ISO{{ exifObj.ISOSpeedRatings }}</span>
+              </h3>
+            </div>
+          </div>
+        </div>
+        <div v-if="template == 'vivo'" class="py-5 flex flex-col justify-center items-center" :class="{
+          'bg-black': theme == 'dark',
+          'text-white': theme == 'dark',
+          'bg-white': theme == 'light',
+          'text-black': theme == 'light',
+        }">
+          <h4 v-show="exifObj.Artist" class="absolute right-10 text-lg tracking-wide" :style="{ color: handwriteColor }">
+            {{ exifObj.Artist }}
+          </h4>
+
+          <img v-if="exifObj.Make" class="w-12 object-contain mb-4"
+            :src="brandLogoPath(exifObj.Make.toLowerCase(), theme)" />
+          <h3 class="mb-2 flex items-center gap-2">
+            <span>{{ exifObj.Model }}</span>
+            <span class="w-[2px] h-3 opacity-75" :class="{
+              'bg-white': theme == 'dark',
+              'bg-black': theme == 'light',
+            }"></span>
+            <span>{{ exifObj.Make }}</span>
+          </h3>
+          <h5 class="flex items-center gap-2 text-xs text-[#717171] leading-none">
+            <span v-show="exifObj.FocalLength">{{ exifObj.FocalLength }}mm</span><span v-show="exifObj.ApertureValue">f/{{
+              exifObj.ApertureValue }}</span><span v-show="exifObj.ExposureTime">{{
+    exifObj.ExposureTime >= 1
+    ? exifObj.ExposureTime
+    : "1/" + Math.round(1 / exifObj.ExposureTime)
+  }}s</span><span v-show="exifObj.ISOSpeedRatings">ISO{{ exifObj.ISOSpeedRatings }}</span>
+          </h5>
+        </div>
+        <div v-if="template == 'huawei'" class="p-5 flex justify-between items-center" :class="{
+          'bg-black': theme == 'dark',
+          'text-white': theme == 'dark',
+          'bg-white': theme == 'light',
+          'text-black': theme == 'light',
+        }">
+          <h3>{{ exifObj.Model }}</h3>
+          <h4 v-show="exifObj.Artist" class="text-lg tracking-wide" :style="{ color: handwriteColor }">
+            {{ exifObj.Artist }}
+          </h4>
+          <div class="flex flex-col items-end gap-2">
+            <h2 class="text-[#cc002b] font-bold tracking-wider">{{ exifObj.Make }}</h2>
+            <h5 class="text-xs">Ultra Lighting {{ exifObj.Make }} Camera</h5>
           </div>
         </div>
       </div>
     </div>
 
-    <div
-      v-if="!showEditor"
-      @click="toggleTheme"
-      class="p-2 cursor-pointer w-10 h-10 grid place-items-center rounded-full fixed right-[10vw] bottom-[30vh]"
-      :class="{ 'bg-white': theme == 'dark', 'bg-black': theme == 'light' }"
-    >
+    <div v-if="!showEditor" @click="refresh" @mouseenter="showTooltips.refresh = true"
+      @mouseleave="showTooltips.refresh = false"
+      class="bg-white p-2 cursor-pointer w-10 h-10 grid place-items-center rounded-full fixed right-[10vw] bottom-[50vh]">
+      <img :src="switcherIcon" />
+      <div v-show="showTooltips.refresh"
+        class="absolute -left-24 bg-white p-2 w-20 grid place-items-center text-center rounded whitespace-nowrap pointer-events-none">
+        <span class="text-xs">重新选图</span>
+        <span class="absolute w-2 h-2 bg-white -right-1 rotate-45"></span>
+      </div>
+    </div>
+
+    <div v-if="!showEditor" @click="toggleTheme" @mouseenter="showTooltips.theme = true"
+      @mouseleave="showTooltips.theme = false"
+      class="bg-white p-2 cursor-pointer w-10 h-10 grid place-items-center rounded-full fixed right-[10vw] bottom-[40vh]">
       <img class="w-6 h-6" :src="theme == 'dark' ? sunIcon : moonIcon" />
+      <div v-show="showTooltips.theme == true"
+        class="absolute -left-24 bg-white p-2 w-20 grid place-items-center text-center rounded whitespace-nowrap pointer-events-none">
+        <span class="text-xs">切换背景</span>
+        <span class="absolute w-2 h-2 bg-inherit -right-1 rotate-45"></span>
+      </div>
     </div>
 
-    <div
-      v-if="!showEditor"
-      @click="showEditor = true"
-      class="bg-white p-2 cursor-pointer w-10 h-10 grid place-items-center rounded-full fixed right-[10vw] bottom-[20vh]"
-    >
+    <div v-if="!showEditor" @click="showEditor = true; showTooltips.edit = false" @mouseenter="showTooltips.edit = true"
+      @mouseleave="showTooltips.edit = false"
+      class="bg-white p-2 cursor-pointer w-10 h-10 grid place-items-center rounded-full fixed right-[10vw] bottom-[30vh]">
       <img :src="editIcon" />
+      <div v-show="showTooltips.edit"
+        class="absolute -left-24 bg-white p-2 w-20 grid place-items-center text-center rounded whitespace-nowrap pointer-events-none">
+        <span class="text-xs">编辑图片</span>
+        <span class="absolute w-2 h-2 bg-white -right-1 rotate-45"></span>
+      </div>
     </div>
 
-    <div
-      v-if="!showEditor"
-      @click="downloadImg"
-      class="bg-white p-2 cursor-pointer w-10 h-10 grid place-items-center rounded-full fixed right-[10vw] bottom-[10vh]"
-    >
+    <div v-if="!showEditor" @click="toggleTemplate" @mouseenter="showTooltips.template = true"
+      @mouseleave="showTooltips.template = false"
+      class="bg-white p-2 cursor-pointer w-10 h-10 grid place-items-center rounded-full fixed right-[10vw] bottom-[20vh]">
+      <img :src="slideshowIcon" />
+      <div v-show="showTooltips.template"
+        class="absolute -left-24 bg-white p-2 w-20 grid place-items-center text-center rounded whitespace-nowrap pointer-events-none">
+        <span class="text-xs">切换样式</span>
+        <span class="absolute w-2 h-2 bg-white -right-1 rotate-45"></span>
+      </div>
+    </div>
+
+    <div v-if="!showEditor" @click="downloadImg" @mouseenter="showTooltips.download = true"
+      @mouseleave="showTooltips.download = false"
+      class="bg-white p-2 cursor-pointer w-10 h-10 grid place-items-center rounded-full fixed right-[10vw] bottom-[10vh]">
       <img :src="downloadIcon" />
+
+      <div v-show="showTooltips.download"
+        class="absolute -left-24 bg-white p-2 w-20 grid place-items-center text-center rounded whitespace-nowrap pointer-events-none">
+        <span class="text-xs">保存图片</span>
+        <span class="absolute w-2 h-2 bg-white -right-1 rotate-45"></span>
+      </div>
     </div>
   </div>
-  <div
-    @click="uploadImg"
+  <div @click="uploadImg"
     class="w-full h-full md:w-9/12 md:h-4/5 cursor-pointer flex flex-col items-center justify-center rounded-lg md:border-4 md:border-dotted md:border-white m-10"
-    v-else
-  >
-    <img class="w-48 h-48" :src="imageAddIcon" />
+    v-else>
+    <img class="w-48 object-contain" :src="imageAddIcon" />
     <button
-      class="text-[#8bc63f] bg-white hover:bg-[#8bc63f] hover:text-white transition-all px-10 py-2 mt-16 font-bold rounded"
-    >
+      class="bg-[#8bc63f] text-white hover:bg-white hover:text-[#8bc63f] transition-all px-10 py-2 mt-16 font-bold rounded">
       添加图片
     </button>
     <input ref="fileInput" class="hidden" type="file" accept="image/*" />
@@ -225,41 +388,31 @@ const toggleTheme = () =>
 
   <header class="absolute top-4 flex gap-1 items-center" v-if="!imageUrl">
     <img class="w-8 h-8" :src="logo" alt="" />
-    <h3 class="text-white text-lg">
+    <div class="text-white text-lg">
       eetphoto<span class="text-[#8bc63f]">.</span>
-    </h3>
+    </div>
   </header>
 
-  <footer
-    class="absolute bottom-4 text-gray-400 text-sm flex text-center items-center justify-between gap-2"
-    v-if="!imageUrl"
-  >
-    <a target="_blank" href="https://beian.miit.gov.cn/"
-      >豫ICP备2023005272号-1</a
-    >
+  <footer class="absolute bottom-4 text-gray-400 text-sm flex text-center items-center justify-between gap-2"
+    v-if="!imageUrl">
+    <a target="_blank" href="https://beian.miit.gov.cn/">豫ICP备2023005272号-1</a>
     <span>leetphoto.com</span>
   </footer>
 
-  <div
-    class="glass text-gray-300 w-full h-full md:w-2/3 md:h-4/5 overflow-y-scroll absolute flex flex-col md:flex-row px-6 py-10 gap-4"
-    v-if="exifObj && showEditor"
-  >
-    <button
-      @click="showEditor = false"
-      class="absolute top-2 right-2 rounded-full p-1 hover:bg-white transition-all"
-    >
+  <div class="glass w-full h-full md:w-2/3 md:h-4/5 absolute flex flex-col md:flex-row px-6 py-10 gap-4"
+    v-if="exifObj && showEditor">
+    <button @click="showEditor = false" class="absolute top-2 right-2 rounded-full p-1 hover:bg-white transition-all">
       <img class="w-6 h-6" :src="closeIcon" />
     </button>
     <div class="flex-1">
       <h3 class="border-b pb-2 mb-6">选择相机厂商</h3>
 
       <div class="flex flex-wrap gap-4">
-        <div
-          class="flex flex-col gap-2 cursor-pointer"
-          @click="toggleBrand(brand)"
-          v-for="(_, brand) in brandLogos"
-        >
-          <div class="border rounded-full p-2 bg-white self-center">
+        <div class="flex flex-col gap-2 cursor-pointer" @click="toggleBrand(brand)" v-for="(_, brand) in brandLogos">
+          <div class="border-2 rounded-full p-2 bg-white self-center" :class="{
+            'border-[#61c63f]':
+              exifObj.Make && brand == exifObj.Make.toLowerCase(),
+          }">
             <img class="w-6 h-6 object-contain" :src="brandLogoPath(brand)" />
           </div>
           <h5 class="text-xs self-center">{{ brand }}</h5>
@@ -271,65 +424,48 @@ const toggleTheme = () =>
       <div class="grid grid-cols-2 gap-4">
         <div class="flex flex-col gap-2">
           <h5>相机厂商</h5>
-          <input
-            class="outline-none px-2 py-1 rounded text-gray-600"
-            type="text"
-            v-model="exifObj.Make"
-          />
+          <input class="outline-none px-2 py-1 rounded text-gray-600" type="text" v-model="exifObj.Make" />
         </div>
         <div class="flex flex-col gap-2">
           <h5>相机型号</h5>
-          <input
-            class="outline-none px-2 py-1 rounded text-gray-600"
-            type="text"
-            v-model="exifObj.Model"
-          />
+          <input class="outline-none px-2 py-1 rounded text-gray-600" type="text" v-model="exifObj.Model" />
         </div>
         <div class="flex flex-col gap-2">
           <h5>焦距(mm)</h5>
-          <input
-            class="outline-none px-2 py-1 rounded text-gray-600"
-            type="number"
-            min="1"
-            v-model="exifObj.FocalLengthIn35mmFilm"
-          />
+          <input class="outline-none px-2 py-1 rounded text-gray-600" type="number" min="1"
+            v-model="exifObj.FocalLength" />
         </div>
         <div class="flex flex-col gap-2">
           <h5>光圈(ƒ)</h5>
-          <input
-            class="outline-none px-2 py-1 rounded text-gray-600"
-            type="number"
-            step="0.1"
-            min="0.95"
-            v-model="exifObj.ApertureValue"
-          />
+          <input class="outline-none px-2 py-1 rounded text-gray-600" type="number" step="0.1" min="0.95"
+            v-model="exifObj.ApertureValue" />
         </div>
         <div class="flex flex-col gap-2">
           <h5>快门速度(s)</h5>
-          <input
-            class="outline-none px-2 py-1 rounded text-gray-600"
-            type="number"
-            step="0.001"
-            min="0.001"
-            v-model="exifObj.ExposureTime"
-          />
+          <input class="outline-none px-2 py-1 rounded text-gray-600" type="number" step="0.001" min="0.001"
+            v-model="exifObj.ExposureTime" />
         </div>
         <div class="flex flex-col gap-2">
           <h5>ISO</h5>
-          <input
-            class="outline-none px-2 py-1 rounded text-gray-600"
-            type="number"
-            min="50"
-            v-model="exifObj.ISOSpeedRatings"
-          />
+          <input class="outline-none px-2 py-1 rounded text-gray-600" type="number" min="50"
+            v-model="exifObj.ISOSpeedRatings" />
         </div>
         <div class="flex flex-col gap-2">
           <h5>拍摄时间</h5>
-          <input
-            class="outline-none px-2 py-1 rounded text-gray-600"
-            type="datetime-local"
-            v-model="exifObj.DateTimeFormated"
-          />
+          <input class="outline-none px-2 py-1 rounded text-gray-600" type="datetime-local"
+            v-model="exifObj.DateTimeFormated" />
+        </div>
+        <div class="flex flex-col gap-2 relative">
+          <div class="flex justify-between items-center">
+            <h5>拍摄者(签名)</h5>
+            <div class="flex gap-1 relative">
+              <img class="cursor-pointer" @click="pickColor" :src="paletteIcon" />
+              <input @change="colorPickerInput" type="color" class="hidden" ref="colorPicker" v-model="handwriteColor" />
+            </div>
+          </div>
+
+          <input class="outline-none px-2 py-1 rounded text-gray-600" placeholder="拼音或英文..." type="text"
+            v-model="exifObj.Artist" />
         </div>
       </div>
     </div>
