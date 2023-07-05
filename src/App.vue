@@ -45,15 +45,13 @@ const uploadImg = () => {
 };
 
 const getExif = () => {
-  setTimeout(() => {
-    EXIF.getData(document.getElementById("photo"), function () {
-      exifObj.value = EXIF.getAllTags(this);
-      exifObj.value.DateTimeFormated =
-        exifObj.value.DateTimeOriginal.split(" ")[0].replaceAll(":", "-") +
-        "T" +
-        exifObj.value.DateTimeOriginal.split(" ")[1].substr(0, 5);
-    });
-  }, 1000);
+  EXIF.getData(document.getElementById("photo"), function () {
+    exifObj.value = EXIF.getAllTags(this);
+    exifObj.value.DateTimeFormated =
+      exifObj.value.DateTimeOriginal.split(" ")[0].replaceAll(":", "-") +
+      "T" +
+      exifObj.value.DateTimeOriginal.split(" ")[1].substr(0, 5);
+  });
 };
 
 const brandLogoPath = (logo, theme) => {
@@ -74,11 +72,12 @@ onMounted(() => {
 
     const fileReader = new FileReader();
     fileReader.addEventListener("load", (event) => {
-      $loader.value.hide();
-
       imageUrl.value = fileReader.result;
 
-      getExif();
+      setTimeout(() => {
+        getExif();
+        $loader.value.hide();
+      }, 1000);
     });
 
     fileReader.readAsDataURL(e.target.files[0]);
@@ -110,7 +109,7 @@ const brandLogos = {
 };
 
 const rectangleLogo = computed(
-  () => brandLogos[exifObj.value.Make.toLowerCase()] == "y"
+  () => brandLogos[exifObj.value.Make.toLowerCase()][0] == "y"
 );
 
 const toggleBrand = (brand) => (exifObj.value.Make = brand.toUpperCase());
@@ -153,7 +152,7 @@ const toggleTheme = () =>
             :class="{ 'w-12': rectangleLogo, 'w-8': !rectangleLogo }"
             :src="brandLogoPath(exifObj.Make.toLowerCase(), theme)"
           />
-          <div class="w-[1.5px] h-9 bg-gray-300"></div>
+          <div class="w-[1.5px] h-9 bg-gray-300 opacity-75"></div>
           <div class="flex flex-col justify-between gap-3">
             <h3 class="flex gap-2.5 text-sm leading-none">
               <span v-show="exifObj.FocalLengthIn35mmFilm"
@@ -171,14 +170,14 @@ const toggleTheme = () =>
               >
             </h3>
             <h5
-              class="font-light opacity-75 text-xs leading-none flex gap-1 tracking-wider"
+              class="font-light text-gray-500 opacity-75 text-xs leading-none tracking-wider flex gap-1"
             >
               <span v-if="exifObj.DateTimeFormated">{{
                 exifObj.DateTimeFormated.split("T")[0].replaceAll("-", ".")
               }}</span
-              ><span v-if="exifObj.DateTimeFormated">{{
-                exifObj.DateTimeFormated.split("T")[1]
-              }}</span>
+              ><span v-if="exifObj.DateTimeFormated"
+                >{{ exifObj.DateTimeFormated.split("T")[1] }}:00</span
+              >
             </h5>
           </div>
         </div>
