@@ -14,8 +14,8 @@
     }
 
     @font-face {
-        font-family: "MiSans-Regular";
-        src: url(./fonts/MiSans-Regular.woff2) format('woff2');
+        font-family: "MiSans-ExtraLight";
+        src: url(./fonts/MiSans-ExtraLight.woff2) format('woff2');
     }
 
     
@@ -25,8 +25,8 @@
     }
 
     @font-face {
-        font-family: "Dongqing";
-        src: url(./fonts/DongQingHeiTiJianTiZhongWen-W6-2.woff2) format('woff2');
+        font-family: "MuktaMahee";
+        src: url(./fonts/MuktaMahee-SemiBold.woff) format('woff2');
         font-weight: 600;
         letter-spacing: 1rem;
     }
@@ -45,11 +45,11 @@
     }
 
     h4 {
-        @apply font-ExtralLight;
+        @apply font-Thin;
     }
 
     h5 {
-        @apply font-Regular;
+        @apply font-ExtralLight;
     }
 
 }

@@ -4,11 +4,11 @@ module.exports = {
   theme: {
     extend: {},
     fontFamily: {
-      Bold: ["Optima", "sans-serif"],
-      SemiBold: ["Dongqing", "sans-serif"],
-      Demibold: ["MiSans-Demibold", "sans-serif"],
-      Regular: ["MiSans-Regular", "sans-serif"],
-      ExtralLight: ["Handwrite", "sans-serif"],
+      Bold: ["Optima"],
+      SemiBold: ["MuktaMahee"],
+      Demibold: ["MiSans-Demibold"],
+      Thin: ["Handwrite"],
+      ExtralLight: ["MiSans-ExtralLight"],
     },
   },
   plugins: [],

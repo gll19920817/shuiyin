@@ -8,7 +8,9 @@ import sunIcon from "./assets/imgs/sun-line.png";
 import moonIcon from "./assets/imgs/moon-line.png";
 import switcherIcon from "./assets/imgs/camera-switch-line.png";
 import slideshowIcon from "./assets/imgs/slideshow-line.png";
+
 import paletteIcon from "./assets/imgs/palette-line.svg";
+import fontSizeIcon from "./assets/imgs/font-size.png";
 
 import { ref, onMounted, computed, watch } from "vue";
 import { useLoading } from "vue-loading-overlay";
@@ -102,7 +104,6 @@ const welcomeMessage = () => {
 }
 
 onMounted(() => {
-
   fileInput.value.addEventListener("change", (e) => {
     $loader.value = $loading.show({
       color: "#8bc63f",
@@ -160,7 +161,12 @@ const rectangleLogo = computed(
 
 const toggleBrand = (brand) => (exifObj.value.Make = brand.toUpperCase());
 
-const refresh = () => window.location.reload();
+const refresh = () => {
+  let ok = confirm('Tip：记得保存嗷🙌🏻')
+  if (ok) {
+    window.location.reload();
+  }
+}
 
 const theme = ref("light");
 const toggleTheme = () =>
@@ -192,6 +198,9 @@ watch(theme, (newTheme) => {
   handwriteColor.value = newTheme == "dark" ? "#ffffff" : "#000000";
 });
 
+const handwriteFontsize = ref(18)
+const showFontsizeSlider = ref(false)
+
 const oritorientation = ref('landscape')
 </script>
 
@@ -218,7 +227,8 @@ const oritorientation = ref('landscape')
             <h3 v-show="exifObj.Model" class="text-sm">{{ exifObj.Model }}</h3>
           </div>
 
-          <h4 v-show="exifObj.Artist" class="text-lg tracking-wide" :style="{ color: handwriteColor }">
+          <h4 v-show="exifObj.Artist" class="tracking-wide"
+            :style="{ color: handwriteColor, fontSize: handwriteFontsize + 'px' }">
             {{ exifObj.Artist }}
           </h4>
 
@@ -236,7 +246,7 @@ const oritorientation = ref('landscape')
                     : "1/" + Math.round(1 / exifObj.ExposureTime)
                   }}s</span><span v-show="exifObj.ISOSpeedRatings">ISO{{ exifObj.ISOSpeedRatings }}</span>
               </h3>
-              <h5 class="font-light text-[#717171] opacity-75 text-xs leading-none tracking-wider flex gap-1">
+              <h5 class="font-light text-[#717171] text-xs leading-none tracking-wider flex gap-1">
                 <span v-if="exifObj.DateTimeFormated">{{
                   exifObj.DateTimeFormated.split("T")[0].replaceAll("-", ".")
                 }}</span><span v-if="exifObj.DateTimeFormated">{{
@@ -253,7 +263,8 @@ const oritorientation = ref('landscape')
           'text-black': theme == 'light',
         }" v-else-if="template == 'oppo'">
           <h3>{{ exifObj.Model }}</h3>
-          <h4 v-show="exifObj.Artist" class="text-lg tracking-wide" :style="{ color: handwriteColor }">
+          <h4 v-show="exifObj.Artist" class="tracking-wide"
+            :style="{ color: handwriteColor, fontSize: handwriteFontsize + 'px' }">
             {{ exifObj.Artist }}
           </h4>
           <div class="flex flex-col items-end gap-3">
@@ -272,13 +283,14 @@ const oritorientation = ref('landscape')
             </div>
           </div>
         </div>
-        <div v-if="template == 'vivo'" class="py-5 flex flex-col justify-center items-center" :class="{
+        <div v-if="template == 'vivo'" class="py-4 flex flex-col justify-center items-center" :class="{
           'bg-black': theme == 'dark',
           'text-white': theme == 'dark',
           'bg-white': theme == 'light',
           'text-black': theme == 'light',
         }">
-          <h4 v-show="exifObj.Artist" class="absolute right-10 text-lg tracking-wide" :style="{ color: handwriteColor }">
+          <h4 v-show="exifObj.Artist" class="absolute right-10 tracking-wide"
+            :style="{ color: handwriteColor, fontSize: handwriteFontsize + 'px' }">
             {{ exifObj.Artist }}
           </h4>
 
@@ -301,80 +313,80 @@ const oritorientation = ref('landscape')
   }}s</span><span v-show="exifObj.ISOSpeedRatings">ISO{{ exifObj.ISOSpeedRatings }}</span>
           </h5>
         </div>
-        <div v-if="template == 'huawei'" class="p-5 flex justify-between items-center" :class="{
+        <div v-if="template == 'huawei'" class="px-4 py-2 flex justify-between items-center" :class="{
           'bg-black': theme == 'dark',
           'text-white': theme == 'dark',
           'bg-white': theme == 'light',
           'text-black': theme == 'light',
         }">
           <h3>{{ exifObj.Model }}</h3>
-          <h4 v-show="exifObj.Artist" class="text-lg tracking-wide" :style="{ color: handwriteColor }">
+          <h4 v-show="exifObj.Artist" class="tracking-wide"
+            :style="{ color: handwriteColor, fontSize: handwriteFontsize + 'px' }">
             {{ exifObj.Artist }}
           </h4>
-          <div class="flex flex-col items-end gap-2">
-            <h2 class="text-[#cc002b] font-bold tracking-wider">{{ exifObj.Make }}</h2>
-            <h5 class="text-xs">Ultra Lighting {{ exifObj.Make }} Camera</h5>
+          <div class="flex flex-col items-end">
+            <h2 class="text-[#ad213a] font-bold tracking-wider leading-none">{{ exifObj.Make }}</h2>
+            <h5 class="text-xs" style="font-weight: 600;">Ultra Lighting {{ exifObj.Make }} Camera</h5>
           </div>
         </div>
       </div>
     </div>
 
-    <div v-if="!showEditor" @click="refresh" @mouseenter="showTooltips.refresh = true"
-      @mouseleave="showTooltips.refresh = false"
-      class="bg-white p-2 cursor-pointer w-10 h-10 grid place-items-center rounded-full fixed right-[10vw] bottom-[50vh]">
-      <img :src="switcherIcon" />
-      <div v-show="showTooltips.refresh"
-        class="absolute -left-24 bg-white p-2 w-20 grid place-items-center text-center rounded whitespace-nowrap pointer-events-none">
-        <span class="text-xs">重新选图</span>
-        <span class="absolute w-2 h-2 bg-white -right-1 rotate-45"></span>
+    <div class="fixed right-[15%] top-[50%] -translate-y-[50%] flex flex-col gap-10 items-center" v-if="!showEditor">
+      <div @click="refresh" @mouseenter="showTooltips.refresh = true" @mouseleave="showTooltips.refresh = false"
+        class="bg-white p-2 cursor-pointer w-10 h-10 grid place-items-center rounded-full">
+        <img :src="switcherIcon" />
+        <div v-show="showTooltips.refresh"
+          class="absolute -left-24 bg-white p-2 w-20 grid place-items-center text-center rounded whitespace-nowrap pointer-events-none">
+          <span class="text-xs">重新选图</span>
+          <span class="absolute w-2 h-2 bg-white -right-1 rotate-45"></span>
+        </div>
       </div>
-    </div>
 
-    <div v-if="!showEditor" @click="toggleTheme" @mouseenter="showTooltips.theme = true"
-      @mouseleave="showTooltips.theme = false"
-      class="bg-white p-2 cursor-pointer w-10 h-10 grid place-items-center rounded-full fixed right-[10vw] bottom-[40vh]">
-      <img class="w-6 h-6" :src="theme == 'dark' ? sunIcon : moonIcon" />
-      <div v-show="showTooltips.theme == true"
-        class="absolute -left-24 bg-white p-2 w-20 grid place-items-center text-center rounded whitespace-nowrap pointer-events-none">
-        <span class="text-xs">切换背景</span>
-        <span class="absolute w-2 h-2 bg-inherit -right-1 rotate-45"></span>
+      <div @click="toggleTheme" @mouseenter="showTooltips.theme = true" @mouseleave="showTooltips.theme = false"
+        class="bg-white p-2 cursor-pointer w-10 h-10 grid place-items-center rounded-full">
+        <img class="w-6 h-6" :src="theme == 'dark' ? sunIcon : moonIcon" />
+        <div v-show="showTooltips.theme == true"
+          class="absolute -left-24 bg-white p-2 w-20 grid place-items-center text-center rounded whitespace-nowrap pointer-events-none">
+          <span class="text-xs">切换背景</span>
+          <span class="absolute w-2 h-2 bg-inherit -right-1 rotate-45"></span>
+        </div>
       </div>
-    </div>
 
-    <div v-if="!showEditor" @click="showEditor = true; showTooltips.edit = false" @mouseenter="showTooltips.edit = true"
-      @mouseleave="showTooltips.edit = false"
-      class="bg-white p-2 cursor-pointer w-10 h-10 grid place-items-center rounded-full fixed right-[10vw] bottom-[30vh]">
-      <img :src="editIcon" />
-      <div v-show="showTooltips.edit"
-        class="absolute -left-24 bg-white p-2 w-20 grid place-items-center text-center rounded whitespace-nowrap pointer-events-none">
-        <span class="text-xs">编辑图片</span>
-        <span class="absolute w-2 h-2 bg-white -right-1 rotate-45"></span>
+      <div @click="showEditor = true; showTooltips.edit = false" @mouseenter="showTooltips.edit = true"
+        @mouseleave="showTooltips.edit = false"
+        class="bg-white p-2 cursor-pointer w-10 h-10 grid place-items-center rounded-full">
+        <img :src="editIcon" />
+        <div v-show="showTooltips.edit"
+          class="absolute -left-24 bg-white p-2 w-20 grid place-items-center text-center rounded whitespace-nowrap pointer-events-none">
+          <span class="text-xs">编辑图片</span>
+          <span class="absolute w-2 h-2 bg-white -right-1 rotate-45"></span>
+        </div>
       </div>
-    </div>
 
-    <div v-if="!showEditor" @click="toggleTemplate" @mouseenter="showTooltips.template = true"
-      @mouseleave="showTooltips.template = false"
-      class="bg-white p-2 cursor-pointer w-10 h-10 grid place-items-center rounded-full fixed right-[10vw] bottom-[20vh]">
-      <img :src="slideshowIcon" />
-      <div v-show="showTooltips.template"
-        class="absolute -left-24 bg-white p-2 w-20 grid place-items-center text-center rounded whitespace-nowrap pointer-events-none">
-        <span class="text-xs">切换样式</span>
-        <span class="absolute w-2 h-2 bg-white -right-1 rotate-45"></span>
+      <div @click="toggleTemplate" @mouseenter="showTooltips.template = true" @mouseleave="showTooltips.template = false"
+        class="bg-white p-2 cursor-pointer w-10 h-10 grid place-items-center rounded-full">
+        <img :src="slideshowIcon" />
+        <div v-show="showTooltips.template"
+          class="absolute -left-24 bg-white p-2 w-20 grid place-items-center text-center rounded whitespace-nowrap pointer-events-none">
+          <span class="text-xs">切换样式</span>
+          <span class="absolute w-2 h-2 bg-white -right-1 rotate-45"></span>
+        </div>
       </div>
-    </div>
 
-    <div v-if="!showEditor" @click="downloadImg" @mouseenter="showTooltips.download = true"
-      @mouseleave="showTooltips.download = false"
-      class="bg-white p-2 cursor-pointer w-10 h-10 grid place-items-center rounded-full fixed right-[10vw] bottom-[10vh]">
-      <img :src="downloadIcon" />
+      <div @click="downloadImg" @mouseenter="showTooltips.download = true" @mouseleave="showTooltips.download = false"
+        class="bg-white p-2 cursor-pointer w-10 h-10 grid place-items-center rounded-full">
+        <img :src="downloadIcon" />
 
-      <div v-show="showTooltips.download"
-        class="absolute -left-24 bg-white p-2 w-20 grid place-items-center text-center rounded whitespace-nowrap pointer-events-none">
-        <span class="text-xs">保存图片</span>
-        <span class="absolute w-2 h-2 bg-white -right-1 rotate-45"></span>
+        <div v-show="showTooltips.download"
+          class="absolute -left-24 bg-white p-2 w-20 grid place-items-center text-center rounded whitespace-nowrap pointer-events-none">
+          <span class="text-xs">保存图片</span>
+          <span class="absolute w-2 h-2 bg-white -right-1 rotate-45"></span>
+        </div>
       </div>
     </div>
   </div>
+
   <div @click="uploadImg"
     class="w-full h-full md:w-9/12 md:h-4/5 cursor-pointer flex flex-col items-center justify-center rounded-lg md:border-4 md:border-dotted md:border-white m-10"
     v-else>
@@ -399,13 +411,13 @@ const oritorientation = ref('landscape')
     <span>leetphoto.com</span>
   </footer>
 
-  <div class="glass w-full h-full md:w-2/3 md:h-4/5 absolute flex flex-col md:flex-row px-6 py-10 gap-4"
+  <div class="glass w-full h-full md:w-2/3 md:h-4/5 overflow-y-auto absolute flex flex-col md:flex-row px-6 py-10 gap-4"
     v-if="exifObj && showEditor">
     <button @click="showEditor = false" class="absolute top-2 right-2 rounded-full p-1 hover:bg-white transition-all">
       <img class="w-6 h-6" :src="closeIcon" />
     </button>
     <div class="flex-1">
-      <h3 class="border-b pb-2 mb-6">选择相机厂商</h3>
+      <div class="border-b pb-2 mb-6">选择相机厂商</div>
 
       <div class="flex flex-wrap gap-4">
         <div class="flex flex-col gap-2 cursor-pointer" @click="toggleBrand(brand)" v-for="(_, brand) in brandLogos">
@@ -420,47 +432,59 @@ const oritorientation = ref('landscape')
       </div>
     </div>
     <div class="flex-1">
-      <h3 class="border-b pb-2 mb-6">Exif信息</h3>
+      <div class="border-b pb-2 mb-6">Exif信息</div>
       <div class="grid grid-cols-2 gap-4">
         <div class="flex flex-col gap-2">
-          <h5>相机厂商</h5>
+          <label>相机厂商</label>
           <input class="outline-none px-2 py-1 rounded text-gray-600" type="text" v-model="exifObj.Make" />
         </div>
         <div class="flex flex-col gap-2">
-          <h5>相机型号</h5>
+          <label>相机型号</label>
           <input class="outline-none px-2 py-1 rounded text-gray-600" type="text" v-model="exifObj.Model" />
         </div>
         <div class="flex flex-col gap-2">
-          <h5>焦距(mm)</h5>
+          <label>焦距(mm)</label>
           <input class="outline-none px-2 py-1 rounded text-gray-600" type="number" min="1"
             v-model="exifObj.FocalLength" />
         </div>
         <div class="flex flex-col gap-2">
-          <h5>光圈(ƒ)</h5>
+          <label>光圈(ƒ)</label>
           <input class="outline-none px-2 py-1 rounded text-gray-600" type="number" step="0.1" min="0.95"
             v-model="exifObj.ApertureValue" />
         </div>
         <div class="flex flex-col gap-2">
-          <h5>快门速度(s)</h5>
+          <label>快门速度(s)</label>
           <input class="outline-none px-2 py-1 rounded text-gray-600" type="number" step="0.001" min="0.001"
             v-model="exifObj.ExposureTime" />
         </div>
         <div class="flex flex-col gap-2">
-          <h5>ISO</h5>
+          <label>ISO</label>
           <input class="outline-none px-2 py-1 rounded text-gray-600" type="number" min="50"
             v-model="exifObj.ISOSpeedRatings" />
         </div>
         <div class="flex flex-col gap-2">
-          <h5>拍摄时间</h5>
+          <label>拍摄时间</label>
           <input class="outline-none px-2 py-1 rounded text-gray-600" type="datetime-local"
             v-model="exifObj.DateTimeFormated" />
         </div>
         <div class="flex flex-col gap-2 relative">
           <div class="flex justify-between items-center">
-            <h5>拍摄者(签名)</h5>
-            <div class="flex gap-1 relative">
-              <img class="cursor-pointer" @click="pickColor" :src="paletteIcon" />
-              <input @change="colorPickerInput" type="color" class="hidden" ref="colorPicker" v-model="handwriteColor" />
+            <label>拍摄者(签名)</label>
+            <div class="flex gap-2 items-center">
+              <div class="flex relative">
+                <img @click="showFontsizeSlider = !showFontsizeSlider" class="w-4 h-4 cursor-pointer"
+                  :src="fontSizeIcon" />
+                <div v-show="showFontsizeSlider"
+                  class="absolute -top-10 right-0 border bg-white py-2 px-3 rounded flex items-center gap-2">
+                  <input type="range" min="16" max="24" step="1" v-model="handwriteFontsize" />
+                  <span class="text-sm">{{ handwriteFontsize }}px</span>
+                </div>
+              </div>
+              <div class="flex">
+                <img class="w-4 h-4 cursor-pointer" @click="pickColor" :src="paletteIcon" />
+                <input @change="colorPickerInput" type="color" class="w-0 h-0" ref="colorPicker"
+                  v-model="handwriteColor" />
+              </div>
             </div>
           </div>
 
