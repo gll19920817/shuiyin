@@ -2,13 +2,14 @@
 module.exports = {
   content: ["./index.html", "./src/App.vue"],
   theme: {
-    extend: {},
-    fontFamily: {
-      Bold: ["Optima"],
-      SemiBold: ["MuktaMahee"],
-      Demibold: ["MiSans-Demibold"],
-      Thin: ["Handwrite"],
-      ExtralLight: ["MiSans-ExtralLight"],
+    extend: {
+      fontFamily: {
+        optima: "Optima",
+        midemibold: 'MiSans-Demibold',
+        mithin: 'MiSans-Thin',
+        handwrite: 'Handwrite',
+        mukta: 'MuktaMahee',
+      }
     },
   },
   plugins: [],

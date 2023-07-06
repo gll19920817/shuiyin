@@ -240,23 +240,23 @@ const oritorientation = ref('landscape')
           'text-white': theme == 'dark',
           'bg-white': theme == 'light',
           'text-black': theme == 'light',
-          'p-8': oritorientation == 'portrait'
+          'p-6': oritorientation == 'portrait'
         }">
           <div>
-            <h3 v-show="exifObj.Model">{{ exifObj.Model }}</h3>
+            <div class="font-midemibold" v-show="exifObj.Model">{{ exifObj.Model }}</div>
           </div>
 
-          <h4 v-show="exifObj.Artist" class="tracking-wide"
+          <div v-show="exifObj.Artist" class="font-handwrite tracking-wide"
             :style="{ color: handwriteColor, fontSize: handwriteFontsize + 'px' }">
             {{ exifObj.Artist }}
-          </h4>
+          </div>
 
           <div class="flex justify-between items-center gap-3">
             <img v-if="exifObj.Make" class="h-8 object-contain" :class="{ 'w-12': rectangleLogo, 'w-8': !rectangleLogo }"
               :src="brandLogoPath(exifObj.Make.toLowerCase(), theme)" />
-            <div class="w-[1.5px] h-9 bg-[#cbcbcb] opacity-75"></div>
+            <div class="w-[1px] h-9 bg-[#cbcbcb] opacity-75"></div>
             <div class="flex flex-col justify-between gap-3">
-              <h3 class="flex gap-2 leading-none">
+              <div class="font-midemibold flex gap-2 leading-none">
                 <span v-show="exifObj.FocalLength">{{ exifObj.FocalLength }}mm</span><span
                   v-show="exifObj.ApertureValue">f/{{ exifObj.ApertureValue }}</span><span
                   v-show="exifObj.ExposureTime">{{
@@ -264,14 +264,14 @@ const oritorientation = ref('landscape')
                     ? exifObj.ExposureTime
                     : "1/" + Math.round(1 / exifObj.ExposureTime)
                   }}s</span><span v-show="exifObj.ISOSpeedRatings">ISO{{ exifObj.ISOSpeedRatings }}</span>
-              </h3>
-              <h5 class="flex items-center gap-2 text-xs text-[#6c6c6c] leading-none">
+              </div>
+              <div class="font-mithin font-bold flex items-center gap-2 text-xs text-[#676767] leading-none tracking-wider">
                 <span v-if="exifObj.DateTimeFormated">{{
                   exifObj.DateTimeFormated.split("T")[0].replaceAll("-", ".")
                 }}</span><span v-if="exifObj.DateTimeFormated">{{
-  exifObj.DateTimeFormated.split("T")[1]
+  exifObj.DateTimeFormated.split("T")[1]+':00'
 }}</span>
-              </h5>
+              </div>
             </div>
           </div>
         </div>
@@ -281,16 +281,16 @@ const oritorientation = ref('landscape')
           'bg-white': theme == 'light',
           'text-black': theme == 'light',
         }" v-else-if="template == 'oppo'">
-          <h3>{{ exifObj.Model }}</h3>
-          <h4 v-show="exifObj.Artist" class="tracking-wide"
+          <div class="font-midemibold">{{ exifObj.Model }}</div>
+          <div v-show="exifObj.Artist" class="font-handwrite tracking-wide"
             :style="{ color: handwriteColor, fontSize: handwriteFontsize + 'px' }">
             {{ exifObj.Artist }}
-          </h4>
+          </div>
           <div class="flex flex-col items-end gap-3">
-            <h1>{{ exifObj.Make }}</h1>
+            <div class="font-mukta">{{ exifObj.Make }}</div>
             <div class="flex items-center gap-2">
               <span class="w-2 h-2 rounded-full bg-[#fd7a22]"></span>
-              <h3 class="flex items-center gap-2 text-sm text-[#6c6c6c] leading-none">
+              <div class=" font-midemibold flex items-center gap-2 text-sm text-[#6c6c6c] leading-none">
                 <span v-show="exifObj.FocalLength">{{ exifObj.FocalLength }}mm</span><span
                   v-show="exifObj.ApertureValue">f/{{ exifObj.ApertureValue }}</span><span
                   v-show="exifObj.ExposureTime">{{
@@ -298,7 +298,7 @@ const oritorientation = ref('landscape')
                     ? exifObj.ExposureTime
                     : "1/" + Math.round(1 / exifObj.ExposureTime)
                   }}s</span><span v-show="exifObj.ISOSpeedRatings">ISO{{ exifObj.ISOSpeedRatings }}</span>
-              </h3>
+              </div>
             </div>
           </div>
         </div>
@@ -308,29 +308,29 @@ const oritorientation = ref('landscape')
           'bg-white': theme == 'light',
           'text-black': theme == 'light',
         }">
-          <h4 v-show="exifObj.Artist" class="absolute right-10 tracking-wide"
+          <div v-show="exifObj.Artist" class="absolute right-10 font-handwrite tracking-wide"
             :style="{ color: handwriteColor, fontSize: handwriteFontsize + 'px' }">
             {{ exifObj.Artist }}
-          </h4>
+          </div>
 
           <img v-if="exifObj.Make" class="w-12 object-contain mb-4"
             :src="brandLogoPath(exifObj.Make.toLowerCase(), theme)" />
-          <h3 class="mb-2 flex items-center gap-2">
+          <div class="font-midemibold mb-2 flex items-center gap-2">
             <span>{{ exifObj.Model }}</span>
             <span class="w-[2px] h-3 opacity-75" :class="{
               'bg-white': theme == 'dark',
               'bg-black': theme == 'light',
             }"></span>
             <span>{{ exifObj.Make }}</span>
-          </h3>
-          <h5 class="flex items-center gap-2 text-xs text-[#6c6c6c] leading-none">
+          </div>
+          <div class="flex items-center gap-2 text-xs text-[#6c6c6c] leading-none">
             <span v-show="exifObj.FocalLength">{{ exifObj.FocalLength }}mm</span><span v-show="exifObj.ApertureValue">f/{{
               exifObj.ApertureValue }}</span><span v-show="exifObj.ExposureTime">{{
     exifObj.ExposureTime >= 1
     ? exifObj.ExposureTime
     : "1/" + Math.round(1 / exifObj.ExposureTime)
   }}s</span><span v-show="exifObj.ISOSpeedRatings">ISO{{ exifObj.ISOSpeedRatings }}</span>
-          </h5>
+          </div>
         </div>
         <div v-if="template == 'huawei'" class="px-4 py-2 flex justify-between items-center" :class="{
           'bg-black': theme == 'dark',
@@ -338,14 +338,14 @@ const oritorientation = ref('landscape')
           'bg-white': theme == 'light',
           'text-black': theme == 'light',
         }">
-          <h3>{{ exifObj.Model }}</h3>
-          <h4 v-show="exifObj.Artist" class="tracking-wide"
+          <div class="font-midemibold">{{ exifObj.Model }}</div>
+          <div v-show="exifObj.Artist" class="tracking-wide"
             :style="{ color: handwriteColor, fontSize: handwriteFontsize + 'px' }">
             {{ exifObj.Artist }}
-          </h4>
-          <div class="flex flex-col items-end gap-1">
-            <h2 class="text-[#ad213a] font-bold tracking-wider leading-none">{{ exifObj.Make }}</h2>
-            <h5 class="text-xs" style="font-weight: 600;">Confidently take photos with {{ exifObj.Make }} camera.</h5>
+          </div>
+          <div class="flex flex-col items-end gap-2">
+            <div class="font-optima text-[#ad213a] font-bold tracking-wider leading-none">{{ exifObj.Make }}</div>
+            <div class="text-semibold text-xs">Confidently take photos with {{ exifObj.Make }} camera.</div>
           </div>
         </div>
       </div>
@@ -451,7 +451,7 @@ const oritorientation = ref('landscape')
           }">
             <img class="w-6 h-6 object-contain" :src="brandLogoPath(brand)" />
           </div>
-          <h5 class="text-xs self-center">{{ brand }}</h5>
+          <div class="text-xs self-center">{{ brand }}</div>
         </div>
       </div>
     </div>
