@@ -27,8 +27,6 @@
     @font-face {
         font-family: "MuktaMahee";
         src: url(./fonts/MuktaMahee-SemiBold.woff) format('woff2');
-        font-weight: 600;
-        letter-spacing: 1rem;
     }
 
 

@@ -1,6 +1,7 @@
 <script setup>
 import logo from "./assets/imgs/logo.png";
 import imageAddIcon from "./assets/imgs/image-add-line.png";
+
 import editIcon from "./assets/imgs/image-edit-line.png";
 import downloadIcon from "./assets/imgs/download-line.png";
 import closeIcon from "./assets/imgs/close-line.png";
@@ -13,15 +14,24 @@ import paletteIcon from "./assets/imgs/palette-line.svg";
 import fontSizeIcon from "./assets/imgs/font-size.png";
 
 import { ref, onMounted, computed, watch } from "vue";
-import { useLoading } from "vue-loading-overlay";
 
 import { useToast } from "vue-toast-notification";
 import "vue-toast-notification/dist/theme-sugar.css";
+
+import { Typed } from "@duskmoon/vue3-typed-js";
+
+const options = {
+  strings: ["eetphoto.", "et's image."],
+  loop: true,
+  typeSpeed: 100,
+  backSpeed: 50,
+};
 
 const $toast = useToast({
   position: "top-right",
 });
 
+import { useLoading } from "vue-loading-overlay";
 const $loading = useLoading({});
 
 const $loader = ref(null);
@@ -104,6 +114,12 @@ const welcomeMessage = () => {
 }
 
 onMounted(() => {
+  document.addEventListener("click", (e) => {
+    if (showEditor.value == true) {
+      showEditor.value = false
+    }
+  })
+
   fileInput.value.addEventListener("change", (e) => {
     $loader.value = $loading.show({
       color: "#8bc63f",
@@ -178,16 +194,19 @@ const tmpl_idx = ref(0);
 const template = computed(() => templates[tmpl_idx.value % templates.length]);
 const toggleTemplate = () => {
   tmpl_idx.value++;
-  $toast.info(`水印样式【${templates[tmpl_idx.value % templates.length]}】`);
+  $toast.info(`水印样式【${templates[tmpl_idx.value % templates.length].toUpperCase()}】`);
 };
 
 const showTooltips = ref({
+  menu: false,
   refresh: false,
   theme: false,
   edit: false,
   template: false,
   download: false,
 });
+
+const menuOpen = ref(false)
 
 const handwriteColor = ref(theme.value == "dark" ? "#ffffff" : "#000000");
 const colorPickerInput = (e) => {
@@ -224,7 +243,7 @@ const oritorientation = ref('landscape')
           'p-8': oritorientation == 'portrait'
         }">
           <div>
-            <h3 v-show="exifObj.Model" class="text-sm">{{ exifObj.Model }}</h3>
+            <h3 v-show="exifObj.Model">{{ exifObj.Model }}</h3>
           </div>
 
           <h4 v-show="exifObj.Artist" class="tracking-wide"
@@ -237,7 +256,7 @@ const oritorientation = ref('landscape')
               :src="brandLogoPath(exifObj.Make.toLowerCase(), theme)" />
             <div class="w-[1.5px] h-9 bg-[#cbcbcb] opacity-75"></div>
             <div class="flex flex-col justify-between gap-3">
-              <h3 class="flex gap-2 text-sm leading-none">
+              <h3 class="flex gap-2 leading-none">
                 <span v-show="exifObj.FocalLength">{{ exifObj.FocalLength }}mm</span><span
                   v-show="exifObj.ApertureValue">f/{{ exifObj.ApertureValue }}</span><span
                   v-show="exifObj.ExposureTime">{{
@@ -246,7 +265,7 @@ const oritorientation = ref('landscape')
                     : "1/" + Math.round(1 / exifObj.ExposureTime)
                   }}s</span><span v-show="exifObj.ISOSpeedRatings">ISO{{ exifObj.ISOSpeedRatings }}</span>
               </h3>
-              <h5 class="font-light text-[#717171] text-xs leading-none tracking-wider flex gap-1">
+              <h5 class="flex items-center gap-2 text-xs text-[#6c6c6c] leading-none">
                 <span v-if="exifObj.DateTimeFormated">{{
                   exifObj.DateTimeFormated.split("T")[0].replaceAll("-", ".")
                 }}</span><span v-if="exifObj.DateTimeFormated">{{
@@ -271,7 +290,7 @@ const oritorientation = ref('landscape')
             <h1>{{ exifObj.Make }}</h1>
             <div class="flex items-center gap-2">
               <span class="w-2 h-2 rounded-full bg-[#fd7a22]"></span>
-              <h3 class="flex items-center gap-2 text-xs text-[#717171] leading-none">
+              <h3 class="flex items-center gap-2 text-sm text-[#6c6c6c] leading-none">
                 <span v-show="exifObj.FocalLength">{{ exifObj.FocalLength }}mm</span><span
                   v-show="exifObj.ApertureValue">f/{{ exifObj.ApertureValue }}</span><span
                   v-show="exifObj.ExposureTime">{{
@@ -304,7 +323,7 @@ const oritorientation = ref('landscape')
             }"></span>
             <span>{{ exifObj.Make }}</span>
           </h3>
-          <h5 class="flex items-center gap-2 text-xs text-[#717171] leading-none">
+          <h5 class="flex items-center gap-2 text-xs text-[#6c6c6c] leading-none">
             <span v-show="exifObj.FocalLength">{{ exifObj.FocalLength }}mm</span><span v-show="exifObj.ApertureValue">f/{{
               exifObj.ApertureValue }}</span><span v-show="exifObj.ExposureTime">{{
     exifObj.ExposureTime >= 1
@@ -324,22 +343,23 @@ const oritorientation = ref('landscape')
             :style="{ color: handwriteColor, fontSize: handwriteFontsize + 'px' }">
             {{ exifObj.Artist }}
           </h4>
-          <div class="flex flex-col items-end">
+          <div class="flex flex-col items-end gap-1">
             <h2 class="text-[#ad213a] font-bold tracking-wider leading-none">{{ exifObj.Make }}</h2>
-            <h5 class="text-xs" style="font-weight: 600;">Ultra Lighting {{ exifObj.Make }} Camera</h5>
+            <h5 class="text-xs" style="font-weight: 600;">Confidently take photos with {{ exifObj.Make }} camera.</h5>
           </div>
         </div>
       </div>
     </div>
 
-    <div class="fixed right-[15%] top-[50%] -translate-y-[50%] flex flex-col gap-10 items-center" v-if="!showEditor">
+    <div class="fixed right-[15%] top-[50%] transition-all -translate-y-[50%] flex flex-col gap-10 font-bold text-[#0f0f0f] items-center"
+      v-if="!showEditor">
       <div @click="refresh" @mouseenter="showTooltips.refresh = true" @mouseleave="showTooltips.refresh = false"
         class="bg-white p-2 cursor-pointer w-10 h-10 grid place-items-center rounded-full">
         <img :src="switcherIcon" />
         <div v-show="showTooltips.refresh"
-          class="absolute -left-24 bg-white p-2 w-20 grid place-items-center text-center rounded whitespace-nowrap pointer-events-none">
+          class="absolute left-[120%] bg-white p-2 w-20 grid place-items-center text-center rounded whitespace-nowrap pointer-events-none">
           <span class="text-xs">重新选图</span>
-          <span class="absolute w-2 h-2 bg-white -right-1 rotate-45"></span>
+          <span class="absolute w-2 h-2 bg-white -left-1 rotate-45"></span>
         </div>
       </div>
 
@@ -347,20 +367,9 @@ const oritorientation = ref('landscape')
         class="bg-white p-2 cursor-pointer w-10 h-10 grid place-items-center rounded-full">
         <img class="w-6 h-6" :src="theme == 'dark' ? sunIcon : moonIcon" />
         <div v-show="showTooltips.theme == true"
-          class="absolute -left-24 bg-white p-2 w-20 grid place-items-center text-center rounded whitespace-nowrap pointer-events-none">
+          class="absolute left-[120%] bg-white p-2 w-20 grid place-items-center text-center rounded whitespace-nowrap pointer-events-none">
           <span class="text-xs">切换背景</span>
-          <span class="absolute w-2 h-2 bg-inherit -right-1 rotate-45"></span>
-        </div>
-      </div>
-
-      <div @click="showEditor = true; showTooltips.edit = false" @mouseenter="showTooltips.edit = true"
-        @mouseleave="showTooltips.edit = false"
-        class="bg-white p-2 cursor-pointer w-10 h-10 grid place-items-center rounded-full">
-        <img :src="editIcon" />
-        <div v-show="showTooltips.edit"
-          class="absolute -left-24 bg-white p-2 w-20 grid place-items-center text-center rounded whitespace-nowrap pointer-events-none">
-          <span class="text-xs">编辑图片</span>
-          <span class="absolute w-2 h-2 bg-white -right-1 rotate-45"></span>
+          <span class="absolute w-2 h-2 bg-inherit -left-1 rotate-45"></span>
         </div>
       </div>
 
@@ -368,9 +377,20 @@ const oritorientation = ref('landscape')
         class="bg-white p-2 cursor-pointer w-10 h-10 grid place-items-center rounded-full">
         <img :src="slideshowIcon" />
         <div v-show="showTooltips.template"
-          class="absolute -left-24 bg-white p-2 w-20 grid place-items-center text-center rounded whitespace-nowrap pointer-events-none">
+          class="absolute left-[120%] bg-white p-2 w-20 grid place-items-center text-center rounded whitespace-nowrap pointer-events-none">
           <span class="text-xs">切换样式</span>
-          <span class="absolute w-2 h-2 bg-white -right-1 rotate-45"></span>
+          <span class="absolute w-2 h-2 bg-white -left-1 rotate-45"></span>
+        </div>
+      </div>
+
+      <div @click.stop="showEditor = true; showTooltips.edit = false" @mouseenter="showTooltips.edit = true"
+        @mouseleave="showTooltips.edit = false"
+        class="bg-white p-2 cursor-pointer w-10 h-10 grid place-items-center rounded-full">
+        <img :src="editIcon" />
+        <div v-show="showTooltips.edit"
+          class="absolute left-[120%] bg-white p-2 w-20 grid place-items-center text-center rounded whitespace-nowrap pointer-events-none">
+          <span class="text-xs">编辑图片</span>
+          <span class="absolute w-2 h-2 bg-white -left-1 rotate-45"></span>
         </div>
       </div>
 
@@ -379,9 +399,9 @@ const oritorientation = ref('landscape')
         <img :src="downloadIcon" />
 
         <div v-show="showTooltips.download"
-          class="absolute -left-24 bg-white p-2 w-20 grid place-items-center text-center rounded whitespace-nowrap pointer-events-none">
+          class="absolute left-[120%] bg-white p-2 w-20 grid place-items-center text-center rounded whitespace-nowrap pointer-events-none">
           <span class="text-xs">保存图片</span>
-          <span class="absolute w-2 h-2 bg-white -right-1 rotate-45"></span>
+          <span class="absolute w-2 h-2 bg-white -left-1 rotate-45"></span>
         </div>
       </div>
     </div>
@@ -397,11 +417,14 @@ const oritorientation = ref('landscape')
     </button>
     <input ref="fileInput" class="hidden" type="file" accept="image/*" />
   </div>
-
+  
   <header class="absolute top-4 flex gap-1 items-center" v-if="!imageUrl">
     <img class="w-8 h-8" :src="logo" alt="" />
-    <div class="text-white text-lg">
-      eetphoto<span class="text-[#8bc63f]">.</span>
+    <div class="text-white text-lg flex">
+      <Typed :options="options">
+        <span class="typing"></span>
+      </Typed>
+      <!-- <span class="text-[#8bc63f]">.</span> -->
     </div>
   </header>
 
@@ -411,7 +434,8 @@ const oritorientation = ref('landscape')
     <span>leetphoto.com</span>
   </footer>
 
-  <div class="glass w-full h-full md:w-2/3 md:h-4/5 overflow-y-auto absolute flex flex-col md:flex-row px-6 py-10 gap-4"
+  <div @click.stop=""
+    class="glass w-full h-full md:w-2/3 md:h-4/5 overflow-y-auto absolute flex flex-col md:flex-row px-6 py-10 gap-4"
     v-if="exifObj && showEditor">
     <button @click="showEditor = false" class="absolute top-2 right-2 rounded-full p-1 hover:bg-white transition-all">
       <img class="w-6 h-6" :src="closeIcon" />

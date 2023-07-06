@@ -8,6 +8,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@duskmoon/vue3-typed-js": "^0.0.4",
     "html-to-image": "^1.11.11",
     "remove": "^0.1.5",
     "v-tooltip": "^2.1.3",
