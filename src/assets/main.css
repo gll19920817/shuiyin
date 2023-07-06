@@ -28,28 +28,6 @@
     src: url(./fonts/MuktaMahee-SemiBold.woff) format('woff2');
 }
 
-
-    /* h1 {
-        @apply font-Bold;
-    }
-
-    h2 {
-        @apply font-SemiBold;
-    }
-
-    h3 {
-        @apply font-Demibold;
-    }
-
-    h4 {
-        @apply font-Thin;
-    }
-
-    h5 {
-        @apply font-ExtralLight;
-    } */
-
-
 .glass {
     /* From https://css.glass */
     background: rgba(255, 255, 255, 0.2);
